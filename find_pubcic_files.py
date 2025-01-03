@@ -57,14 +57,14 @@ MIME_TYPES = {
 # 検索対象の共有フォルダのIDと、結果を保存するスプレッドシートのID
 SHARED_FOLDERS = {
     "Python Boot Camp": (
-        "0AHeZnmob9mlbUk9PVA", "1Jhv8DSZ1K2oUOP-2u7NoK5xEv6P6GW79PUrMtDrk9C0"
+        "0AHeZnmob9mlbUk9PVA",
+        "1Jhv8DSZ1K2oUOP-2u7NoK5xEv6P6GW79PUrMtDrk9C0",
     ),
     "PyCon JP Association": (
-        "0AKLhHa9lUV2NUk9PVA", "1i4Tx83Bx5l16o_1jMWDxZCoIu_7p-ATzB5VAN-ZCCm8"
+        "0AKLhHa9lUV2NUk9PVA",
+        "1i4Tx83Bx5l16o_1jMWDxZCoIu_7p-ATzB5VAN-ZCCm8",
     ),
-    "PyCon JP": (
-        "0AB4V-gRXzKWgUk9PVA", "1Rpc6rJY5DI1-oRiMz5vYMEUrDMXCa1CRGyAMwxcdYl0"
-    ),
+    "PyCon JP": ("0AB4V-gRXzKWgUk9PVA", "1Rpc6rJY5DI1-oRiMz5vYMEUrDMXCa1CRGyAMwxcdYl0"),
 }
 
 
@@ -110,16 +110,20 @@ def search_public_files(service, shared_folder_id: str) -> list:
         # ファイルの一覧を取得する
         # 共有フォルダの場合はdriveID〜supportsAllDrivesの引数が必要（らしい）
         # https://developers.google.com/drive/api/reference/rest/v3/files/list
-        files = service.files().list(
-            q=query,
-            driveId=shared_folder_id,
-            corpora="drive",
-            includeItemsFromAllDrives=True,
-            supportsAllDrives=True,
-            fields=fields,
-            pageToken=page_token,
-            pageSize=1000,
-        ).execute()
+        files = (
+            service.files()
+            .list(
+                q=query,
+                driveId=shared_folder_id,
+                corpora="drive",
+                includeItemsFromAllDrives=True,
+                supportsAllDrives=True,
+                fields=fields,
+                pageToken=page_token,
+                pageSize=1000,
+            )
+            .execute()
+        )
         items = files.get("files", [])
 
         if not items:
@@ -144,9 +148,11 @@ def retry_append_row(worksheet, row: list[str], max_retries=5, initial_delay=5):
         except APIError as e:
             # レート制限
             if e.code == 429:
-                delay = initial_delay * (2 ** attempt) + random()
+                delay = initial_delay * (2**attempt) + random()
                 print(f"リクエストが失敗（code: {e.code}）")
-                print(f"{delay:.2f}秒後にリトライ(試行回数: {attempt + 1}/{max_retries})")
+                print(
+                    f"{delay:.2f}秒後にリトライ(試行回数: {attempt + 1}/{max_retries})"
+                )
                 time.sleep(delay)
             else:
                 raise  # レート制限以外のエラーはそのまま例外を上げる
