@@ -1,3 +1,4 @@
+"""PyCon JP AssociationのGoogleドライブのフォルダにある、公開ァイルの一覧を取得する"""
 import os
 import time
 from datetime import datetime
